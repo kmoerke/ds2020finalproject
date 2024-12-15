@@ -29,11 +29,6 @@ head(df)
 
 Here is a description of all the variables in the dataset.
 
-```{r}
-# Writing the dataframe to a CSV file
-write.csv(iowa_df, file = "iowa_walkability_data.csv", row.names = FALSE)
-
-```
 
 Below shows restricting the data to just Iowa, then several plots comparing variables to walkability.
 ```{r}
@@ -56,12 +51,7 @@ ggplot(data = iowa_df, aes(x = AutoOwn0, y = NatWalkInd)) +
        y = "National Walkability Index") +
   theme_minimal()
 
-ggplot(data = iowa_df, aes(x = Workers, y = NatWalkInd)) +
-  geom_point() +
-  labs(title = "Comparison of Percentage of households owning zero vehicles and National Walkability Index",
-       x = "Num Workers",
-       y = "National Walkability Index") +
-  theme_minimal()
+
 
 
 # Convert data from wide to long format
@@ -78,6 +68,13 @@ ggplot(data = long_df, aes(x = Value, y = NatWalkInd, color = Variable)) +
   theme_minimal()
 
 
+
+```
+
+
+```{r}
+# Writing the dataframe to a CSV file
+write.csv(iowa_df, file = "iowa_walkability_data.csv", row.names = FALSE)
 
 ```
 ```{r}
