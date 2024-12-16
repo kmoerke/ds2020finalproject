@@ -226,8 +226,12 @@ ggplot(data = iowa_df, aes(x = factor(CSA_Name), y = NatWalkInd)) +
   theme_minimal()
 ```
 
-![](keeganreport_files/figure-gfm/unnamed-chunk-5-1.png)<!-- --> -This
-plot compares intersection density to walkability score
+![](keeganreport_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+This plot shows the distribution of walkability within a certain
+census-designated area such as the Des Moines area. This shows that
+places like Des Moines has a higher walkability than places that are not
+associated with a metropolitan area.
 
 ``` r
 library(ggplot2)
@@ -239,7 +243,7 @@ ggplot(data = iowa_df, aes(x = D3B, y = NatWalkInd)) +
   theme_minimal()
 ```
 
-![](keeganreport_files/figure-gfm/unnamed-chunk-6-1.png)<!-- --> -This
+![](keeganreport_files/figure-gfm/unnamed-chunk-6-1.png)<!-- --> This
 plot compares intersection density to walkability score
 
 ``` r
@@ -253,6 +257,172 @@ ggplot(data = iowa_df, aes(x = NatWalkInd, weight = TotPop)) +
   theme_minimal()
 ```
 
-![](keeganreport_files/figure-gfm/unnamed-chunk-7-1.png)<!-- --> -This
+![](keeganreport_files/figure-gfm/unnamed-chunk-7-1.png)<!-- --> This
 plot shows distribution of each block by its walkability indexs weighted
 by population
+
+``` r
+library(corrplot)
+```
+
+    ## Warning: package 'corrplot' was built under R version 4.4.2
+
+    ## corrplot 0.95 loaded
+
+``` r
+relevant <- iowa_df %>% select(TotPop, NatWalkInd, D3B, D3BPO3, Workers, AutoOwn0, E5_Ret, E5_Off, E5_Ind, D4D, D4E, D5BE )
+
+numeric_data <- iowa_df %>% select_if(is.numeric)
+
+# Compute correlations with NatWalkInd
+correlations <- sapply(numeric_data, function(x) cor(x, iowa_df$NatWalkInd, use = "complete.obs"))
+```
+
+    ## Warning in cor(x, iowa_df$NatWalkInd, use = "complete.obs"): the standard
+    ## deviation is zero
+
+    ## Warning in cor(x, iowa_df$NatWalkInd, use = "complete.obs"): the standard
+    ## deviation is zero
+    ## Warning in cor(x, iowa_df$NatWalkInd, use = "complete.obs"): the standard
+    ## deviation is zero
+    ## Warning in cor(x, iowa_df$NatWalkInd, use = "complete.obs"): the standard
+    ## deviation is zero
+
+``` r
+# Convert to dataframe for better display
+cor_df <- data.frame(Variable = names(correlations), Correlation = correlations)
+
+# Display the correlations sorted by absolute value
+cor_df <- cor_df %>% arrange(desc(abs(Correlation)))
+
+print(cor_df)
+```
+
+    ##                  Variable Correlation
+    ## NatWalkInd     NatWalkInd  1.00000000
+    ## D4A_Ranked     D4A_Ranked  0.78379545
+    ## D3B_Ranked     D3B_Ranked  0.77091814
+    ## D5DEI               D5DEI  0.76993563
+    ## D5DRI               D5DRI  0.76993559
+    ## D5DE                 D5DE  0.76993533
+    ## D5DR                 D5DR  0.76993533
+    ## D4A                   D4A  0.76948429
+    ## D5BE                 D5BE  0.76801061
+    ## D5BR                 D5BR  0.74898863
+    ## D3A                   D3A  0.74808759
+    ## D3APO               D3APO  0.72085542
+    ## Shape_Length Shape_Length -0.68265920
+    ## D3B                   D3B  0.67149626
+    ## D4D                   D4D  0.66907780
+    ## D4C                   D4C  0.66904393
+    ## D4E                   D4E  0.66903727
+    ## D5CEI               D5CEI  0.61966249
+    ## D5CRI               D5CRI  0.61197738
+    ## Shape_Area     Shape_Area -0.59658375
+    ## Ac_Total         Ac_Total -0.59658375
+    ## Ac_Land           Ac_Land -0.59579866
+    ## D1A                   D1A  0.59559603
+    ## Ac_Unpr           Ac_Unpr -0.59412930
+    ## D1B                   D1B  0.57317040
+    ## D3BPO3             D3BPO3  0.55427072
+    ## D3BPO4             D3BPO4  0.55348862
+    ## Pct_AO2p         Pct_AO2p -0.55145258
+    ## D5AR                 D5AR  0.51208942
+    ## Pct_AO1           Pct_AO1  0.50888581
+    ## D5AE                 D5AE  0.49835528
+    ## D1D                   D1D  0.47804741
+    ## D2C_TRPMX2     D2C_TRPMX2  0.40507357
+    ## D3AMM               D3AMM  0.39821004
+    ## D2R_JOBPOP     D2R_JOBPOP  0.38717749
+    ## D3BMM4             D3BMM4  0.38083985
+    ## D1C5_ENT         D1C5_ENT  0.36270016
+    ## D1C8_ENT         D1C8_ENT  0.36270016
+    ## D2B_Ranked     D2B_Ranked  0.36145144
+    ## D3BMM3             D3BMM3  0.35908018
+    ## Pct_AO0           Pct_AO0  0.35728908
+    ## AutoOwn1         AutoOwn1  0.34628281
+    ## D1C5_RET         D1C5_RET  0.34612835
+    ## D1C8_RET         D1C8_RET  0.34612835
+    ## D2R_WRKEMP     D2R_WRKEMP  0.34602015
+    ## D2B_E8MIXA     D2B_E8MIXA  0.34060719
+    ## AutoOwn0         AutoOwn0  0.33583417
+    ## D1C8_SVC         D1C8_SVC  0.33279450
+    ## D1C                   D1C  0.32395948
+    ## D2C_TRPMX1     D2C_TRPMX1  0.32008480
+    ## D2A_Ranked     D2A_Ranked  0.30521708
+    ## E_LowWageWk   E_LowWageWk  0.30195558
+    ## D2B_E8MIX       D2B_E8MIX  0.29984929
+    ## D2A_EPHHM       D2A_EPHHM  0.29644890
+    ## TRACTCE           TRACTCE -0.27804401
+    ## D2C_TRIPEQ     D2C_TRIPEQ  0.27364783
+    ## E5_Ent             E5_Ent  0.25270355
+    ## E8_Ent             E8_Ent  0.25270355
+    ## CBSA_EMP         CBSA_EMP  0.24431163
+    ## CBSA_POP         CBSA_POP  0.23715671
+    ## CBSA_WRK         CBSA_WRK  0.23526342
+    ## E8_Svc             E8_Svc  0.23287053
+    ## D2B_E5MIXA     D2B_E5MIXA  0.22837439
+    ## D5CR                 D5CR  0.22249130
+    ## D2C_WREMLX     D2C_WREMLX  0.22211988
+    ## CSA                   CSA -0.21784580
+    ## E_MedWageWk   E_MedWageWk  0.21681656
+    ## D1C5_IND         D1C5_IND  0.21440028
+    ## D1C8_IND         D1C8_IND  0.21440028
+    ## E5_Ret             E5_Ret  0.21406069
+    ## E8_Ret             E8_Ret  0.21406069
+    ## E5_Svc             E5_Svc  0.21257154
+    ## D5CE                 D5CE  0.21122879
+    ## P_WrkAge         P_WrkAge  0.21035637
+    ## TotEmp             TotEmp  0.20623672
+    ## D1C5_OFF         D1C5_OFF  0.20374893
+    ## D1C5_SVC         D1C5_SVC  0.20136158
+    ## R_MedWageWk   R_MedWageWk  0.18744063
+    ## E_PctLowWage E_PctLowWage  0.18599961
+    ## D2B_E5MIX       D2B_E5MIX  0.18421947
+    ## Ac_Water         Ac_Water -0.18258680
+    ## D1C8_PUB         D1C8_PUB  0.17987065
+    ## D2A_JPHH         D2A_JPHH  0.17729106
+    ## D1C8_HLTH       D1C8_HLTH  0.17629787
+    ## COUNTYFP         COUNTYFP  0.17132614
+    ## GEOID10           GEOID10  0.16949676
+    ## GEOID20           GEOID20  0.16949676
+    ## D1C8_OFF         D1C8_OFF  0.16525062
+    ## R_PCTLOWWAGE R_PCTLOWWAGE  0.15500702
+    ## R_LowWageWk   R_LowWageWk  0.15250106
+    ## E8_Hlth           E8_Hlth  0.14964152
+    ## E5_Off             E5_Off  0.14882185
+    ## E_HiWageWk     E_HiWageWk  0.14627459
+    ## D3BAO               D3BAO  0.13476071
+    ## E8_Pub             E8_Pub  0.12516322
+    ## E8_off             E8_off  0.12351818
+    ## HH                     HH  0.11147402
+    ## CountHU           CountHU  0.10766702
+    ## Workers           Workers  0.10276295
+    ## CBSA                 CBSA -0.10271239
+    ## D3AAO               D3AAO  0.10238549
+    ## BLKGRPCE         BLKGRPCE  0.09694018
+    ## TotPop             TotPop  0.08598458
+    ## AutoOwn2p       AutoOwn2p -0.08253202
+    ## E8_Ed               E8_Ed  0.07184048
+    ## D1C8_ED           D1C8_ED  0.06367813
+    ## OBJECTID         OBJECTID -0.06282204
+    ## R_HiWageWk     R_HiWageWk  0.04331568
+    ## E5_Ind             E5_Ind -0.02602893
+    ## E8_Ind             E8_Ind -0.02602893
+    ## D2A_WRKEMP     D2A_WRKEMP -0.01158249
+    ## STATEFP           STATEFP          NA
+    ## D1_FLAG           D1_FLAG          NA
+    ## D4B025             D4B025          NA
+    ## D4B050             D4B050          NA
+
+## Conclusion
+
+Walkability depends on multiple factors, some of which can be determined
+by city planners and developers. When developing new neighborhoods, the
+should consider sticking to a simple grid pattern and keep the lots a
+modest size. This will increase the intersection density and thus the
+walkability. Additionally, cities should consider adding more transit
+options such as buses to give residents more options other than driving
+a personal vehicle. The walkability data also tends to show that wealthy
+areas have better walkability. Poor walkability puts everyone at a
+disadvantage.

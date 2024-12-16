@@ -19,7 +19,8 @@ library(ggplot2)
 
 ```
 
-This is the fullset, it is too big for github and to analyze, so I restrict it to only include Iowa and write it to another csv later.
+This is the fullset, it is too big for github and to analyze, so I restrict it to only include Iowa and write it to another csv later. Here is the source to the data.
+https://catalog.data.gov/dataset/walkability-index7
 ```{r}
 
 df <-  read.csv("EPA_SmartLocationDatabase_V3_Jan_2021_Final.csv")
@@ -125,8 +126,10 @@ This plot shows distribution of each block by its walkability indexs weighted by
 library(corrplot)
 relevant <- iowa_df %>% select(TotPop, NatWalkInd, D3B, D3BPO3, Workers, AutoOwn0, E5_Ret, E5_Off, E5_Ind, D4D, D4E, D5BE )
 
+numeric_data <- iowa_df %>% select_if(is.numeric)
+
 # Compute correlations with NatWalkInd
-correlations <- sapply(relevant, function(x) cor(x, iowa_df$NatWalkInd, use = "complete.obs"))
+correlations <- sapply(numeric_data, function(x) cor(x, iowa_df$NatWalkInd, use = "complete.obs"))
 
 # Convert to dataframe for better display
 cor_df <- data.frame(Variable = names(correlations), Correlation = correlations)
@@ -139,3 +142,8 @@ print(cor_df)
 
 
 ```
+
+
+## Conclusion
+
+Walkability depends on multiple factors, some of which can be determined by city planners and developers. When developing  new neighborhoods, the should consider sticking to a simple grid pattern and keep the lots a modest size. This will increase the intersection density and thus the walkability. Additionally, cities should consider adding more transit options such as buses to give residents more options other than driving a personal vehicle. The walkability data also tends to show that wealthy areas have better walkability. Poor walkability puts everyone at a disadvantage.
