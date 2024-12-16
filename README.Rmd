@@ -1,126 +1,149 @@
 ---
-title: "DS 202 Final Project"
-output: 
-  github_document:
-    number_section: FALSE
+title: "Keegan Ds2020 Final"
+author: "Keegan Moerke"
+date: "2024-12-13"
+output: github_document
 ---
 
-<!-- README.md is generated from README.Rmd. Please edit the README.Rmd file -->
-
 ```{r setup, include=FALSE}
-library(knitr)
-knitr::opts_chunk$set(echo = FALSE, warning = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+```
 
 
-knit_hooks$set( fig.cap = function(before, options, envir) {
-  if ( before ) {
-    chr <- sprintf("<p><small><strong><a name='fig:%s' value = %d>Figure %d</a></strong>: %s</small></p>", options$label, options$fig.num, options$fig.num, options$fig.cap)
-    chr <- sprintf("<p><small><strong><a name='fig:%s'>%s</a></strong>: %s</small></p>", options$label, options$label,  options$fig.cap)
-    
-    return(chr)
-  }
-})
+## Abstract
 
+The goal of this project is to find trends in the walkability of cities in Iowa. Walkability is a key indicator of how well cities are planned and of the quality of life in that area. I chose to limit my project to just Iowa because the initial dataset was simply too large and Iowa is of relevance to all of us. Iowa also has plenty of rural and urban areas to show the difference.
 
-chunkref <- local({
-  function(chunklabel) {
-    sprintf('[%s](#%s)', chunklabel, paste0("fig:",chunklabel) )
-  }  
-})
-
+```{r}
 library(ggplot2)
-library(dplyr)
+
+```
+
+This is the fullset, it is too big for github and to analyze, so I restrict it to only include Iowa and write it to another csv later. Here is the source to the data.
+https://catalog.data.gov/dataset/walkability-index7
+```{r}
+
+df <-  read.csv("EPA_SmartLocationDatabase_V3_Jan_2021_Final.csv")
+
+head(df)
 ```
 
 
-This repository serves as a starter repo for your final project, and this Rmd is supposed to serve as a starter file for your project report.
 
-## Part I: Repo Structure {.unnumbered}
+Below shows restricting the data to just Iowa, then several plots comparing variables to walkability.
+```{r}
+ # This will install ggplot2 and other useful packages
+library(tidyverse)
 
-The structure sketched out below is an idea of what your repository might look like. You can use it as a starting base and change according to your needs. But think about the changes that you make!
+iowa_df = subset(df, `STATEFP` == 19)
+# Assuming df is your dataframe
+ggplot(data = iowa_df, aes(x = TotPop, y = NatWalkInd)) +
+  geom_point() +
+  labs(title = "Comparison of Total Population and National Walkability Index",
+       x = "Total Population",
+       y = "National Walkability Index") +
+  theme_minimal()
 
-    -- code
-    |   |   -- any R scripts you need but don't want to include directly in the write-up
-    -- data
-    |   |   -- csv files (cleaned data)
-    -- data-raw
-    |   |   -- raw data files 
-    |   |   -- data description files, origin
-    |   |   -- Codebook
-    -- final-project.Rmd
-    -- images  # only images that are not created by the Rmd
-    -- LICENSE
-    -- README.md
-    -- README.Rmd
-    -- README_files # folder with files created during the knitting process
-
-## Part II: Project report {.unnumbered}
-
+ggplot(data = iowa_df, aes(x = AutoOwn0, y = NatWalkInd)) +
+  geom_point() +
+  labs(title = "Comparison of number of households owning zero vehicles and National Walkability Index",
+       x = "Num Households owning zero vehicles",
+       y = "National Walkability Index") +
+  theme_minimal()
 
 
-# Title of your project {.unnumbered}
 
-Authors: First Name Last Name, First Name Last Name, ...
 
-## Abstract (TL;DR) {.unnumbered}
+# Convert data from wide to long format
+long_df <- iowa_df %>%
+  pivot_longer(cols = c(E_LowWageWk, E_MedWageWk, E_HiWageWk), names_to = "Variable", values_to = "Value")
 
-An abstract is a quick summary of your work. Ideally it should motivate someone to read the rest of the paper. Include one sentence each on
+# Plot the reshaped data
+ggplot(data = long_df, aes(x = Value, y = NatWalkInd, color = Variable)) +
+  geom_point() +
+  labs(title = "Comparison of Walkability Index with Workers of different income",
+       x = "Workers separated by wage classification",
+       y = "National Walkability Index",
+       color = "Variable") +
+  theme_minimal()
 
--   what is the project about?
--   what is the motivation for doing it?
--   what data is your work based on? and where does it come from? = what are your main findings? (one sentence each)
 
-# Intro/Background/Motivation
 
-What is the topic of your project, why is it relevant?
+```
+The first plot just shows population of a block to its walkability index. There is not really any correlation.
 
-At the end of the Intro, write a sentence describing what each of the (result) sections is about, e.g. in section [Results 1] we show the relationship between XXX and YYY,  section [Results 2] also considers the effect of variable ZZZ. ...
-Finally we conclude with a quick summary of our findings and potential follow-up work in section [Conclusions].
+The second plot compares the number of households that own zero cars to the walkability index. This shows that there is some correlation. In the block with the most households without cars have fairly high walkability.
 
-Somewhere at the beginning of your project, include a code chunk that includes all of the R packages you are using throughout. In this document, the setup code chunk is called `setup` (see line 8) Also make sure to set defaults for the code chunks - like should they be visible? (probably not: echo=FALSE). Do you want to automatically include warnings? (probably yes, for creating the Rmd, to make sure that all warnings are accounted for)
+The third plot attempts to find if there is a correlation between walkability and the income of its residents. This shows that the more walkable blocks have higher income residents.
 
-# Quick Data Summary
+```{r}
+# Writing the dataframe to a CSV file
+write.csv(iowa_df, file = "iowa_walkability_data.csv", row.names = FALSE)
 
-What are the variables that you will be using in the main part of the report? What are their ranges? You could include a table with variable names, a short explanation, and (very broad) summary statistics.
+```
+```{r}
 
-# Results
+# Assuming 'iowa_df' is your dataframe and it has columns 'COUNTYFP' and 'NatWalkInd'
+ggplot(data = iowa_df, aes(x = factor(CSA_Name), y = NatWalkInd)) +
+  geom_boxplot() +
+  labs(title = "Faceted Boxplot of Walkability by County",
+       x = "County",
+       y = "National Walkability Index") +
+  facet_wrap(~ CSA_Name, nrow = 4) +
+  theme_minimal()
 
-Each line of exploration is supposed to be featured in one of the Results sections. Make sure to change to more interesting section headers!
-
-## Results 1
-
-In your write-up, make sure to refer to all of the figures you create. You can include a hyperlink to the [scatterplot](#fig:scatterplot) by using the name of the code chunk (make sure, to give each code chunk a different name). In your markdown document you can create this link either by calling the function `chunkref` with the name of the code chunk in quotes, i.e. `` r chunkref("scatterplot") `` or by using the markdown expression `[scatterplot](#fig:scatterplot)`. Similarly, we can refer to the `r chunkref("2nd scatterplot")`. Note that the figure captions appear above the figures - this saves us from having to scroll up after following the link.
-
-```{r scatterplot, echo=FALSE, fig.cap="This is the figure caption. Make sure to use the description we practised in the homework: first sentence describes structure of the plot, second sentence describes main finding, third sentence describes outliers/follow-up.", message = FALSE}
-
-mtcars %>% 
-  ggplot(aes(x = wt, y = mpg)) + 
-  geom_point()
 ```
 
-```{r 2nd scatterplot, echo=FALSE, fig.cap="This is the figure caption. Make sure to use the description we practised in the homework: first sentence describes structure of the plot, second sentence describes main finding, third sentence describes outliers/follow-up.", message = FALSE}
+This plot shows the distribution of walkability within a certain census-designated area such as the Des Moines area. This shows that places like Des Moines has a higher walkability than places that are not associated with a metropolitan area.
 
-mtcars %>% 
-  ggplot(aes(x = wt, y = mpg)) + 
-  geom_point()
+```{r}
+library(ggplot2)
+ggplot(data = iowa_df, aes(x = D3B, y = NatWalkInd)) +
+  geom_point() +
+  labs(title = "Comparison of Intersection Density and National Walkability Index",
+       x = "Intersection Density",
+       y = "National Walkability Index") +
+  theme_minimal()
+```
+This plot compares intersection density to walkability score
+
+
+```{r}
+library(ggplot2)
+# Histogram of National Walkability Index
+ggplot(data = iowa_df, aes(x = NatWalkInd, weight = TotPop)) +
+  geom_histogram(binwidth = 1, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Histogram of National Walkability Index weighted by population",
+       x = "National Walkability Index",
+       y = "Frequency") +
+  theme_minimal()
+
+```
+This plot shows distribution of each block by its walkability indexs weighted by population
+
+
+```{r}
+library(corrplot)
+relevant <- iowa_df %>% select(TotPop, NatWalkInd, D3B, D3BPO3, Workers, AutoOwn0, E5_Ret, E5_Off, E5_Ind, D4D, D4E, D5BE )
+
+numeric_data <- iowa_df %>% select_if(is.numeric)
+
+# Compute correlations with NatWalkInd
+correlations <- sapply(numeric_data, function(x) cor(x, iowa_df$NatWalkInd, use = "complete.obs"))
+
+# Convert to dataframe for better display
+cor_df <- data.frame(Variable = names(correlations), Correlation = correlations)
+
+# Display the correlations sorted by absolute value
+cor_df <- cor_df %>% arrange(desc(abs(Correlation)))
+
+print(cor_df)
+
+
+
 ```
 
-Additionally, you can also refer to different sections in your writeup by using anchors (links) to section headers. Here, we are referring to subsection [Results 3]. The code for that is `[Results 3]`.
 
-## Results 2
+## Conclusion
 
-## Results 3
-
-...
-
-# Conclusions
-
-Give a quick summary of your work. Here is the place to be a bit critical and discuss potential limitations. Add a sentence on what else you would have liked to include in your data exploration if you had more time or more members in your team. 
-
-## Data source {.unnumbered}
-
-Where does the data come from, who owns the data? Where are all the scripts that you need to clean the data?
-
-## References {.unnumbered}
-
-List all resources you used.
+Walkability depends on multiple factors, some of which can be determined by city planners and developers. When developing  new neighborhoods, the should consider sticking to a simple grid pattern and keep the lots a modest size. This will increase the intersection density and thus the walkability. Additionally, cities should consider adding more transit options such as buses to give residents more options other than driving a personal vehicle. The walkability data also tends to show that wealthy areas have better walkability. Poor walkability puts everyone at a disadvantage.
